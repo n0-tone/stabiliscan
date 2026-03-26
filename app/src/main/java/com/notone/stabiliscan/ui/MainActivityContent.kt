@@ -38,8 +38,7 @@ fun MainActivityContent(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
-                modifier = Modifier.fillMaxWidth(0.85f),
-                drawerContainerColor = MaterialTheme.colorScheme.surface
+                modifier = Modifier.fillMaxWidth(0.85f)
             ) {
                 Column(modifier = Modifier.padding(24.dp).fillMaxHeight()) {
                     Text(

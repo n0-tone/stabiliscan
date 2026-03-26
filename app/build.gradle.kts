@@ -53,6 +53,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.camera.camera2)
     
+    // Icons
+    implementation("androidx.compose.material:material-icons-extended")
+
     // New dependencies
     implementation(libs.androidx.navigation.compose)
     implementation(libs.lottie.compose)

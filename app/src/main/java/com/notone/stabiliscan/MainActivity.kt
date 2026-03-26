@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
                     })
                 } else {
                     CameraPermissionScreen {
-                        MainActivityContent(viewModel = viewModel) { _ -> }
+                        MainActivityContent(viewModel = viewModel)
                     }
                 }
             }
