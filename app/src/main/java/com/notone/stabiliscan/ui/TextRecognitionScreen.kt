@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.notone.stabiliscan.camera.CameraPreview
 import com.notone.stabiliscan.sensor.StabilitySensor
 import com.notone.stabiliscan.utils.toBitmapCompat
 import com.notone.stabiliscan.viewmodel.TextRecognitionViewModel

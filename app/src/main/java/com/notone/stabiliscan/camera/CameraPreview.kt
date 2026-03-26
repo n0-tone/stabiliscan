@@ -1,4 +1,4 @@
-package com.notone.stabiliscan.ui
+package com.notone.stabiliscan.camera
 
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture

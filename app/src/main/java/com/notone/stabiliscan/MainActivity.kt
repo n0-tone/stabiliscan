@@ -9,7 +9,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.notone.stabiliscan.ui.CameraPermissionScreen
+import com.notone.stabiliscan.camera.CameraPermissionScreen
 import com.notone.stabiliscan.ui.MainActivityContent
 import com.notone.stabiliscan.ui.OnboardingScreen
 import com.notone.stabiliscan.ui.theme.StabiliScanTheme
