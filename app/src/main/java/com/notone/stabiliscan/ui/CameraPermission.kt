@@ -6,10 +6,11 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.core.content.ContextCompat
 
 @Composable
@@ -23,6 +24,7 @@ fun CameraPermissionHandler(onPermissionGranted: () -> Unit) {
     ) { granted ->
         if (granted) {
             onPermissionGranted()
+            showDialog = false
         } else {
             showDialog = true
         }
@@ -39,22 +41,16 @@ fun CameraPermissionHandler(onPermissionGranted: () -> Unit) {
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { /* Bloqueia o fecho ao carregar fora */ },
-            title = { Text("Permissão Necessária") },
+            title = { Text("Permissão Necessária", fontWeight = FontWeight.Bold) },
             text = { Text("O StabiliScan precisa de aceder à câmara para poder ler texto. Por favor, conceda a permissão para continuar.") },
             confirmButton = {
-                Button(onClick = {
-                    showDialog = false
-                    launcher.launch(permission)
-                }) {
+                Button(
+                    onClick = {
+                        launcher.launch(permission)
+                    },
+                    shape = MaterialTheme.shapes.medium
+                ) {
                     Text("Dar permissão")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    // Se o utilizador disser que não, mantemos o diálogo ou podemos fechar a app.
-                    // O pedido foi "mostrado em loop até o user dar permissão".
-                }) {
-                    Text("Não")
                 }
             }
         )

@@ -1,14 +1,18 @@
 package com.notone.stabiliscan.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -54,7 +58,18 @@ fun OnboardingScreen(onFinished: () -> Unit) {
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxSize()
             ) {
-                LottieAnimationComponent(modifier = Modifier.size(300.dp))
+                // White circle background for Lottie in Dark Mode
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(320.dp)
+                        .background(
+                            color = if (isSystemInDarkTheme()) Color.White.copy(alpha = 0.9f) else Color.Transparent,
+                            shape = CircleShape
+                        )
+                ) {
+                    LottieAnimationComponent(modifier = Modifier.size(300.dp))
+                }
 
                 Spacer(modifier = Modifier.height(32.dp))
 
