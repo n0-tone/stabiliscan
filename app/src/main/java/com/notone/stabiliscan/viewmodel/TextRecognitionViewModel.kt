@@ -29,8 +29,8 @@ class TextRecognitionViewModel(application: Application) : AndroidViewModel(appl
     val savedTexts: StateFlow<List<String>> = preferenceManager.savedTexts
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val isOnboardingCompleted: StateFlow<Boolean> = preferenceManager.isOnboardingCompleted
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+    val isOnboardingCompleted: StateFlow<Boolean?> = preferenceManager.isOnboardingCompleted
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     fun completeOnboarding() {
         viewModelScope.launch {

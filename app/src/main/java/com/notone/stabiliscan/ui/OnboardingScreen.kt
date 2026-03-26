@@ -26,7 +26,7 @@ fun OnboardingScreen(onFinished: () -> Unit) {
         OnboardingPage(
             title = "Bem-vindo ao StabiliScan",
             description = "Uma ferramenta pensada para ajudar na leitura diária, com foco na acessibilidade para idosos.",
-            lottieRes = R.raw.cam // Assuming cam.json is accessible here or use raw if moved
+            lottieRes = R.raw.cam
         ),
         OnboardingPage(
             title = "Estabilidade é Chave",
@@ -55,18 +55,18 @@ fun OnboardingScreen(onFinished: () -> Unit) {
                 modifier = Modifier.fillMaxSize()
             ) {
                 LottieAnimationComponent(modifier = Modifier.size(300.dp))
-                
+
                 Spacer(modifier = Modifier.height(32.dp))
-                
+
                 Text(
                     text = page.title,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 )
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 Text(
                     text = page.description,
                     fontSize = 18.sp,
@@ -82,9 +82,9 @@ fun OnboardingScreen(onFinished: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             TextButton(onClick = onFinished) {
-                Text("Pular", color = MaterialTheme.colorScheme.outline)
+                Text("Saltar", color = MaterialTheme.colorScheme.outline)
             }
-            
+
             Button(
                 onClick = {
                     if (pagerState.currentPage < 2) {
