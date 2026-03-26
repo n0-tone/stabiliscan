@@ -5,16 +5,12 @@ plugins {
 
 android {
     namespace = "com.notone.stabiliscan"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.notone.stabiliscan"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -56,6 +52,12 @@ dependencies {
     implementation(libs.play.services.mlkit.text.recognition)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.camera.camera2)
+    
+    // New dependencies
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.lottie.compose)
+    implementation(libs.androidx.datastore.preferences)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
