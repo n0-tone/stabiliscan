@@ -13,6 +13,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -28,18 +29,18 @@ fun OnboardingScreen(onFinished: () -> Unit) {
 
     val pages = listOf(
         OnboardingPage(
-            title = "Bem-vindo ao StabiliScan",
-            description = "Uma ferramenta pensada para ajudar na leitura diária, com foco na acessibilidade para idosos.",
+            title = stringResource(R.string.onboarding_title_1),
+            description = stringResource(R.string.onboarding_desc_1),
             lottieRes = R.raw.cam
         ),
         OnboardingPage(
-            title = "Estabilidade é Chave",
-            description = "Usamos os sensores do seu telemóvel para garantir que a imagem está nítida antes de ler o texto.",
+            title = stringResource(R.string.onboarding_title_2),
+            description = stringResource(R.string.onboarding_desc_2),
             lottieRes = R.raw.cam
         ),
         OnboardingPage(
-            title = "Leitura Facilitada",
-            description = "Converta qualquer texto impresso em formato digital e ajuste o tamanho da letra para sua conveniência.",
+            title = stringResource(R.string.onboarding_title_3),
+            description = stringResource(R.string.onboarding_desc_3),
             lottieRes = R.raw.cam
         )
     )
@@ -58,7 +59,6 @@ fun OnboardingScreen(onFinished: () -> Unit) {
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxSize()
             ) {
-                // White circle background for Lottie in Dark Mode
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
@@ -97,7 +97,7 @@ fun OnboardingScreen(onFinished: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             TextButton(onClick = onFinished) {
-                Text("Saltar", color = MaterialTheme.colorScheme.outline)
+                Text(stringResource(R.string.skip), color = MaterialTheme.colorScheme.outline)
             }
 
             Button(
@@ -110,7 +110,7 @@ fun OnboardingScreen(onFinished: () -> Unit) {
                 },
                 shape = MaterialTheme.shapes.medium
             ) {
-                Text(if (pagerState.currentPage == 2) "Começar" else "Próximo")
+                Text(if (pagerState.currentPage == 2) stringResource(R.string.start) else stringResource(R.string.next))
             }
         }
     }

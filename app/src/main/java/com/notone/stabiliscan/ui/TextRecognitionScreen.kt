@@ -14,9 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.notone.stabiliscan.R
 import com.notone.stabiliscan.camera.CameraPreview
 import com.notone.stabiliscan.sensor.StabilitySensor
 import com.notone.stabiliscan.utils.toBitmapCompat
@@ -30,18 +32,19 @@ fun TextRecognitionScreen(
     val context = LocalContext.current
     val sensor = remember { StabilitySensor(context) }
     
-    // Logic to only show stability indicator when there's likely text
-    // For now, we use isProcessing as a proxy for "something is happening"
-    // or we could add a "hasText" state to the sensor/preview logic.
-
     DisposableEffect(Unit) {
         sensor.start()
         onDispose { sensor.stop() }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        CameraPreview { imageProxy ->
-            val bitmap = imageProxy.toBitmapCompat()
+        CameraPreview(
+            detectedBlocks = viewModel.detectedTextBlocks,
+            onAnalyze = { image ->
+                viewModel.updateDetectedBlocks(image)
+            }
+        ) { imageProxy ->
+        val bitmap = imageProxy.toBitmapCompat()
 
             if (bitmap != null) {
                 if (sensor.isStable) {
@@ -50,12 +53,11 @@ fun TextRecognitionScreen(
             }
         }
 
-        // Overlay UI for stability - Only shows when device is NOT stable OR when processing
-        // "Pronto para ler" will only show if we are stable AND not already showing a result
+        // Overlay UI for stability
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 140.dp) // Moved up as requested
+                .padding(bottom = 140.dp)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -70,16 +72,13 @@ fun TextRecognitionScreen(
                         .padding(horizontal = 24.dp, vertical = 12.dp)
                 ) {
                     Text(
-                        "⚠ Estabilize o dispositivo",
+                        stringResource(R.string.stabilize_device),
                         color = Color.White,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
-            
-            // We removed the "Pronto para ler" persistent box to avoid clutter.
-            // It was "always on screen" which the user disliked.
         }
 
         if (viewModel.isProcessing) {
@@ -97,7 +96,7 @@ fun TextRecognitionScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        "A ler...", 
+                        stringResource(R.string.reading),
                         color = Color.White, 
                         fontSize = 20.sp, 
                         fontWeight = FontWeight.Bold

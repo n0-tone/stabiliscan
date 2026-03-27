@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">StabiliScan</string>
+    <string name="stabilize_device">⚠ Stabilize the device</string>
+    <string name="reading">Reading…</string>
+    <string name="no_text_found">No text detected. Try moving closer or focusing better.</string>
+    <string name="error_prefix">Error: %1$s</string>
+    <string name="about_app">About the App</string>
+    <string name="app_description">This tool helps seniors with visual impairments or slight tremors. The goal is to facilitate reading documents and labels by capturing text only when the device is stable.</string>
+    <string name="reading_history">Reading History</string>
+    <string name="empty_history">Your captures will appear here.</string>
+    <string name="clear_history">Clear History</string>
+    <string name="history_icon_desc">History</string>
+    <string name="reading_completed">Reading Completed</string>
+    <string name="back">Back</string>
+    <string name="adjust_font_size">Adjust Font Size</string>
+    <string name="onboarding_title_1">Welcome to StabiliScan</string>
+    <string name="onboarding_desc_1">A tool designed to help with daily reading, focusing on accessibility for seniors.</string>
+    <string name="onboarding_title_2">Stability is Key</string>
+    <string name="onboarding_desc_2">We use your phone\'s sensors to ensure the image is sharp before reading the text.</string>
+    <string name="onboarding_title_3">Easy Reading</string>
+    <string name="onboarding_desc_3">Convert any printed text into digital format and adjust the font size for your convenience.</string>
+    <string name="skip">Skip</string>
+    <string name="next">Next</string>
+    <string name="start">Start</string>
+    <string name="clear_history_confirmation_title">Clear History?</string>
+    <string name="clear_history_confirmation_message">Are you sure you want to delete all saved readings?</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="scanning">Scanning…</string>
+</resources>

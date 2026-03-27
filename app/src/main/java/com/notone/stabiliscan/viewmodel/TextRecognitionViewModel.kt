@@ -2,7 +2,9 @@ package com.notone.stabiliscan.viewmodel
 
 import android.app.Application
 import android.graphics.Bitmap
+import android.graphics.Rect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
@@ -28,6 +30,13 @@ class TextRecognitionViewModel(application: Application) : AndroidViewModel(appl
     var isProcessing by mutableStateOf(false)
         private set
 
+    // Real-time detected text blocks for overlay
+    var detectedTextBlocks by mutableStateOf<List<Rect>>(emptyList())
+        private set
+    
+    var lastAnalysisWidth by mutableIntStateOf(0)
+    var lastAnalysisHeight by mutableIntStateOf(0)
+
     private val _scanEvents = MutableSharedFlow<ScanEvent>()
     val scanEvents: SharedFlow<ScanEvent> = _scanEvents
 
@@ -37,20 +46,31 @@ class TextRecognitionViewModel(application: Application) : AndroidViewModel(appl
     val isOnboardingCompleted: StateFlow<Boolean?> = preferenceManager.isOnboardingCompleted
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
+    private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+
     fun completeOnboarding() {
         viewModelScope.launch {
             preferenceManager.setOnboardingCompleted(true)
         }
     }
 
+    fun updateDetectedBlocks(image: InputImage) {
+        lastAnalysisWidth = image.width
+        lastAnalysisHeight = image.height
+
+        recognizer.process(image)
+            .addOnSuccessListener { visionText ->
+                detectedTextBlocks = visionText.textBlocks.mapNotNull { it.boundingBox }
+            }
+            .addOnFailureListener {
+                detectedTextBlocks = emptyList()
+            }
+    }
+
     fun recognizeText(bitmap: Bitmap) {
         if (isProcessing) return
         isProcessing = true
         
-        val recognizer = TextRecognition.getClient(
-            TextRecognizerOptions.DEFAULT_OPTIONS
-        )
-
         val image = InputImage.fromBitmap(bitmap, 0)
 
         recognizer.process(image)

@@ -1,11 +1,10 @@
 package com.notone.stabiliscan.camera
 
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageCapture
-import androidx.camera.core.ImageProxy
-import androidx.camera.core.Preview
+import androidx.annotation.OptIn
+import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -16,24 +15,36 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.google.mlkit.vision.common.InputImage
+import com.notone.stabiliscan.R
+import java.util.concurrent.Executors
 
+@OptIn(ExperimentalGetImage::class)
 @Composable
-fun CameraPreview(onCapture: (ImageProxy) -> Unit) {
+fun CameraPreview(
+    detectedBlocks: List<android.graphics.Rect> = emptyList(),
+    analysisWidth: Int = 0,
+    analysisHeight: Int = 0,
+    onAnalyze: (InputImage) -> Unit = {},
+    onCapture: (ImageProxy) -> Unit
+) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val previewView = remember { PreviewView(context) }
+    val analysisExecutor = remember { Executors.newSingleThreadExecutor() }
 
     var imageCapture: ImageCapture? by remember { mutableStateOf(null) }
 
@@ -47,7 +58,22 @@ fun CameraPreview(onCapture: (ImageProxy) -> Unit) {
                 val preview = Preview.Builder().build()
                 val selector = CameraSelector.DEFAULT_BACK_CAMERA
 
-                imageCapture = ImageCapture.Builder().build()
+                imageCapture = ImageCapture.Builder()
+                    .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                    .build()
+
+                val imageAnalysis = ImageAnalysis.Builder()
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .build()
+
+                imageAnalysis.setAnalyzer(analysisExecutor) { imageProxy ->
+                    val mediaImage = imageProxy.image
+                    if (mediaImage != null) {
+                        val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+                        onAnalyze(image)
+                    }
+                    imageProxy.close()
+                }
 
                 preview.surfaceProvider = previewView.surfaceProvider
 
@@ -57,7 +83,8 @@ fun CameraPreview(onCapture: (ImageProxy) -> Unit) {
                         lifecycleOwner,
                         selector,
                         preview,
-                        imageCapture
+                        imageCapture,
+                        imageAnalysis
                     )
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -66,7 +93,25 @@ fun CameraPreview(onCapture: (ImageProxy) -> Unit) {
             }, ContextCompat.getMainExecutor(context))
         }
 
-        // Improved Main Button (Moved up and better style)
+        // Real-time detection overlay
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            if (analysisWidth > 0 && analysisHeight > 0) {
+                // Note: In portrait, ML Kit often returns width/height swapped or rotated.
+                // For a simple "cool" overlay, we'll do a basic mapping.
+                val scaleX = size.width / analysisWidth.toFloat()
+                val scaleY = size.height / analysisHeight.toFloat()
+
+                detectedBlocks.forEach { rect ->
+                    drawRect(
+                        color = Color.Cyan.copy(alpha = 0.6f),
+                        topLeft = Offset(rect.left * scaleX, rect.top * scaleY),
+                        size = Size(rect.width() * scaleX, rect.height() * scaleY),
+                        style = Stroke(width = 2.dp.toPx())
+                    )
+                }
+            }
+        }
+
         LargeFloatingActionButton(
             onClick = {
                 imageCapture?.takePicture(
@@ -88,7 +133,7 @@ fun CameraPreview(onCapture: (ImageProxy) -> Unit) {
         ) {
             Icon(
                 imageVector = Icons.Default.CameraAlt,
-                contentDescription = "Scan",
+                contentDescription = stringResource(R.string.scanning),
                 modifier = Modifier.size(36.dp)
             )
         }

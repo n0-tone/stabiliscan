@@ -1,5 +1,6 @@
 package com.notone.stabiliscan.ui
 
+import android.annotation.SuppressLint
 import android.view.Gravity
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -16,15 +17,21 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.notone.stabiliscan.R
 import com.notone.stabiliscan.viewmodel.TextRecognitionViewModel
 import kotlinx.coroutines.launch
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainActivityContent(
@@ -34,11 +41,15 @@ fun MainActivityContent(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val savedTexts by viewModel.savedTexts.collectAsState()
-    
+
     var selectedTextForModal by remember { mutableStateOf<String?>(null) }
     var fontSize by remember { mutableFloatStateOf(32f) }
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
 
-    // Listen to scan events for Toast and Modal
+    // ✅ Resolve ALL strings in composable scope
+    val noTextFoundMessage = stringResource(R.string.no_text_found)
+
+    // Listen to scan events
     LaunchedEffect(Unit) {
         viewModel.scanEvents.collect { event ->
             val message = when (event) {
@@ -46,19 +57,21 @@ fun MainActivityContent(
                     selectedTextForModal = event.text
                     null
                 }
+
                 is TextRecognitionViewModel.ScanEvent.NoTextFound -> {
-                    "Nenhum texto detetado. Tente aproximar ou focar melhor."
+                    noTextFoundMessage
                 }
+
                 is TextRecognitionViewModel.ScanEvent.Error -> {
-                    "Erro: ${event.message}"
+                    // ✅ SAFE: use context here instead of stringResource
+                    context.getString(R.string.error_prefix, event.message)
                 }
             }
-            
+
             message?.let {
-                val toast = Toast.makeText(context, it, Toast.LENGTH_SHORT)
-                // Set gravity to display toast higher (Center or specified offset)
-                toast.setGravity(Gravity.CENTER, 0, 0)
-                toast.show()
+                Toast.makeText(context, it, Toast.LENGTH_SHORT).apply {
+                    setGravity(Gravity.CENTER, 0, 0)
+                }.show()
             }
         }
     }
@@ -73,6 +86,7 @@ fun MainActivityContent(
                 drawerTonalElevation = 4.dp
             ) {
                 Column(modifier = Modifier.padding(24.dp).fillMaxHeight()) {
+
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Default.Info,
@@ -82,54 +96,56 @@ fun MainActivityContent(
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            "StabiliScan", 
-                            fontSize = 32.sp, 
+                            stringResource(R.string.app_name),
+                            fontSize = 32.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
-                    
+
                     Spacer(modifier = Modifier.height(24.dp))
-                    
+
                     Text(
-                        "Sobre a Aplicação",
+                        stringResource(R.string.about_app),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.secondary
                     )
-                    
+
                     Surface(
                         color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
                         shape = MaterialTheme.shapes.medium,
                         modifier = Modifier.padding(top = 8.dp)
                     ) {
                         Text(
-                            "Esta ferramenta ajuda idosos com dificuldades visuais ou tremores leves. " +
-                            "O objetivo é facilitar a leitura de documentos e rótulos, capturando texto apenas quando o dispositivo está estável.",
+                            stringResource(R.string.app_description),
                             fontSize = 15.sp,
                             lineHeight = 22.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(16.dp)
                         )
                     }
-                    
+
                     Spacer(modifier = Modifier.height(32.dp))
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     Spacer(modifier = Modifier.height(24.dp))
-                    
+
                     Text(
-                        "Histórico de Leituras",
+                        stringResource(R.string.reading_history),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.secondary
                     )
-                    
+
                     Spacer(modifier = Modifier.height(12.dp))
-                    
+
                     if (savedTexts.isEmpty()) {
-                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        Box(
+                            modifier = Modifier.weight(1f),
+                            contentAlignment = Alignment.Center
+                        ) {
                             Text(
-                                "As suas capturas aparecerão aqui.", 
+                                stringResource(R.string.empty_history),
                                 color = MaterialTheme.colorScheme.outline,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth()
@@ -139,11 +155,13 @@ fun MainActivityContent(
                         LazyColumn(modifier = Modifier.weight(1f)) {
                             items(savedTexts.reversed()) { text ->
                                 Card(
-                                    onClick = { 
+                                    onClick = {
                                         selectedTextForModal = text
                                         scope.launch { drawerState.close() }
                                     },
-                                    modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 6.dp),
                                     colors = CardDefaults.cardColors(
                                         containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                                     ),
@@ -161,18 +179,19 @@ fun MainActivityContent(
                             }
                         }
                     }
-                    
+
                     if (savedTexts.isNotEmpty()) {
                         Button(
-                            onClick = { viewModel.clearHistory() },
-                            modifier = Modifier.align(Alignment.End).padding(top = 16.dp),
+                            onClick = { showDeleteConfirmation = true },
+                            modifier = Modifier
+                                .align(Alignment.End)
+                                .padding(top = 16.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.errorContainer,
                                 contentColor = MaterialTheme.colorScheme.onErrorContainer
-                            ),
-                            shape = MaterialTheme.shapes.medium
+                            )
                         ) {
-                            Text("Limpar Histórico")
+                            Text(stringResource(R.string.clear_history))
                         }
                     }
                 }
@@ -180,12 +199,12 @@ fun MainActivityContent(
         }
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
+
             TextRecognitionScreen(
                 viewModel = viewModel,
-                onTextCaptured = { /* Handled by LaunchedEffect scanEvents */ }
+                onTextCaptured = {}
             )
 
-            // Sleek Minimalist Menu Button
             FilledIconButton(
                 onClick = { scope.launch { drawerState.open() } },
                 modifier = Modifier
@@ -193,58 +212,71 @@ fun MainActivityContent(
                     .statusBarsPadding()
                     .size(64.dp)
                     .align(Alignment.TopStart),
-                shape = CircleShape,
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
-                    contentColor = MaterialTheme.colorScheme.primary
-                )
+                shape = CircleShape
             ) {
                 Icon(
                     imageVector = Icons.Default.History,
-                    contentDescription = "Histórico",
+                    contentDescription = stringResource(R.string.history_icon_desc),
                     modifier = Modifier.size(32.dp)
                 )
             }
         }
     }
 
-    // High Accessibility Modal
-    if (selectedTextForModal != null) {
-        val currentText = selectedTextForModal!!
+    // Confirm dialog
+    if (showDeleteConfirmation) {
         AlertDialog(
-            onDismissRequest = { selectedTextForModal = null },
+            onDismissRequest = { showDeleteConfirmation = false },
+            title = { Text(stringResource(R.string.clear_history_confirmation_title)) },
+            text = { Text(stringResource(R.string.clear_history_confirmation_message)) },
             confirmButton = {
-                Button(
-                    onClick = { selectedTextForModal = null },
-                    modifier = Modifier.fillMaxWidth().height(64.dp),
-                    shape = MaterialTheme.shapes.large,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
+                TextButton(
+                    onClick = {
+                        viewModel.clearHistory()
+                        showDeleteConfirmation = false
+                    }
                 ) {
-                    Text("Voltar", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        stringResource(R.string.confirm),
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
             },
-            title = { 
-                Text(
-                    "Leitura Concluída", 
-                    fontSize = 28.sp, 
-                    fontWeight = FontWeight.ExtraBold,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.primary
-                ) 
-            },
-            text = {
-                Column(modifier = Modifier.fillMaxHeight(0.8f)) {
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirmation = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    // Modal
+    selectedTextForModal?.let { currentText ->
+        Dialog(
+            onDismissRequest = { selectedTextForModal = null },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Surface(
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                shape = MaterialTheme.shapes.extraLarge
+            ) {
+                Column(Modifier.fillMaxSize().padding(24.dp)) {
+
+                    Text(
+                        stringResource(R.string.reading_completed),
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(Modifier.height(24.dp))
+
                     Box(
-                        modifier = Modifier
-                            .weight(1f)
+                        Modifier.weight(1f)
                             .fillMaxWidth()
                             .background(
-                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), 
-                                MaterialTheme.shapes.extraLarge
+                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                             )
                             .padding(24.dp)
                     ) {
@@ -252,49 +284,28 @@ fun MainActivityContent(
                             text = currentText,
                             fontSize = fontSize.sp,
                             lineHeight = (fontSize * 1.3).sp,
-                            textAlign = TextAlign.Start,
-                            modifier = Modifier.verticalScroll(rememberScrollState()),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            modifier = Modifier.verticalScroll(rememberScrollState())
                         )
                     }
-                    
-                    Spacer(modifier = Modifier.height(24.dp))
-                    
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
+
+                    Spacer(Modifier.height(24.dp))
+
+                    Slider(
+                        value = fontSize,
+                        onValueChange = { fontSize = it },
+                        valueRange = 12f..100f
+                    )
+
+                    Spacer(Modifier.height(16.dp))
+
+                    Button(
+                        onClick = { selectedTextForModal = null },
+                        modifier = Modifier.fillMaxWidth().height(72.dp)
                     ) {
-                        Text(
-                            "Ajustar Tamanho da Letra", 
-                            fontSize = 20.sp, 
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Slider(
-                            value = fontSize,
-                            onValueChange = { fontSize = it },
-                            valueRange = 24f..100f,
-                            modifier = Modifier.padding(horizontal = 12.dp),
-                            colors = SliderDefaults.colors(
-                                thumbColor = MaterialTheme.colorScheme.primary,
-                                activeTrackColor = MaterialTheme.colorScheme.primary,
-                                inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer
-                            )
-                        )
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), 
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text("A", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                            Text("A", fontSize = 32.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface)
-                        }
+                        Text(stringResource(R.string.back), fontSize = 22.sp)
                     }
                 }
-            },
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-            containerColor = MaterialTheme.colorScheme.surface,
-            shape = MaterialTheme.shapes.extraLarge
-        )
+            }
+        }
     }
 }
