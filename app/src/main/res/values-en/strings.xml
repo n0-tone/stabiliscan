@@ -32,4 +32,6 @@
     <string name="permission_required_title">Permission Required</string>
     <string name="permission_required_desc">StabiliScan needs access to the camera to read text. Please grant permission to continue.</string>
     <string name="grant_permission">Grant permission</string>
+    <string name="permission_denied_permanently_desc">Camera permission has been permanently denied. Please enable it in system settings to continue.</string>
+    <string name="open_settings">Open Settings</string>
 </resources>

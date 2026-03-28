@@ -32,4 +32,6 @@
     <string name="permission_required_title">Permissão Necessária</string>
     <string name="permission_required_desc">O StabiliScan precisa de aceder à câmara para poder ler texto. Por favor, conceda a permissão para continuar.</string>
     <string name="grant_permission">Dar permissão</string>
+    <string name="permission_denied_permanently_desc">A permissão da câmara foi recusada permanentemente. Por favor, ative-a nas definições do sistema para continuar.</string>
+    <string name="open_settings">Abrir Definições</string>
 </resources>
