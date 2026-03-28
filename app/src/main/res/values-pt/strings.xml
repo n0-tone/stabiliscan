@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">StabiliScan</string>
+    <string name="stabilize_device">⚠ Estabilize o dispositivo</string>
+    <string name="reading">A ler…</string>
+    <string name="no_text_found">Nenhum texto detetado. Tente aproximar ou focar melhor.</string>
+    <string name="error_prefix">Erro: %1$s</string>
+    <string name="about_app">Sobre a Aplicação</string>
+    <string name="app_description">Esta ferramenta ajuda idosos com dificuldades visuais ou tremores leves. O objetivo é facilitar a leitura de documentos e rótulos, capturando texto apenas quando o dispositivo está estável.</string>
+    <string name="reading_history">Histórico de Leituras</string>
+    <string name="empty_history">As suas capturas aparecerão aqui.</string>
+    <string name="clear_history">Limpar Histórico</string>
+    <string name="history_icon_desc">Histórico</string>
+    <string name="reading_completed">Leitura Concluída</string>
+    <string name="back">Voltar</string>
+    <string name="adjust_font_size">Ajustar Tamanho da Letra</string>
+    <string name="onboarding_title_1">Bem-vindo ao StabiliScan</string>
+    <string name="onboarding_desc_1">Uma ferramenta pensada para ajudar na leitura diária, com foco na acessibilidade para idosos.</string>
+    <string name="onboarding_title_2">Estabilidade é Chave</string>
+    <string name="onboarding_desc_2">Usamos os sensores do seu telemóvel para garantir que a imagem está nítida antes de ler o texto.</string>
+    <string name="onboarding_title_3">Leitura Facilitada</string>
+    <string name="onboarding_desc_3">Converta qualquer texto impresso em formato digital e ajuste o tamanho da letra para sua conveniência.</string>
+    <string name="skip">Saltar</string>
+    <string name="next">Próximo</string>
+    <string name="start">Começar</string>
+    <string name="clear_history_confirmation_title">Limpar Histórico?</string>
+    <string name="clear_history_confirmation_message">Tem a certeza que deseja apagar todas as leituras guardadas?</string>
+    <string name="cancel">Cancelar</string>
+    <string name="confirm">Confirmar</string>
+    <string name="scanning">A digitalizar…</string>
+    <string name="copy_to_clipboard">Copiar Texto</string>
+    <string name="copied_to_clipboard">Texto copiado!</string>
+    <string name="permission_required_title">Permissão Necessária</string>
+    <string name="permission_required_desc">O StabiliScan precisa de aceder à câmara para poder ler texto. Por favor, conceda a permissão para continuar.</string>
+    <string name="grant_permission">Dar permissão</string>
+</resources>

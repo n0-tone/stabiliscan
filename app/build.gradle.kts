@@ -10,7 +10,7 @@ android {
     defaultConfig {
         applicationId = "com.notone.stabiliscan"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -55,7 +55,7 @@ dependencies {
     implementation(libs.androidx.camera.camera2)
     
     // Icons
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.androidx.compose.material.icons.extended)
 
     // New dependencies
     implementation(libs.androidx.navigation.compose)

@@ -1,3 +1,7 @@
+@file:Suppress("AssignedValueIsNeverRead", "RedundantSuppression")
+
+// n0-tone, 2026
+
 package com.notone.stabiliscan.ui
 
 import android.annotation.SuppressLint
@@ -80,6 +84,7 @@ import com.notone.stabiliscan.R
 import com.notone.stabiliscan.viewmodel.TextRecognitionViewModel
 import kotlinx.coroutines.launch
 
+@Suppress("AssignedValueIsNeverRead")
 @SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -313,9 +318,13 @@ fun MainActivityContent(
     }
 
     // Confirm dialog
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
     if (showDeleteConfirmation) {
         AlertDialog(
-            onDismissRequest = { showDeleteConfirmation = false },
+            onDismissRequest = {
+                @Suppress("AssignedValueIsNeverRead")
+                showDeleteConfirmation = false
+            },
             title = { Text(stringResource(R.string.clear_history_confirmation_title)) },
             text = { Text(stringResource(R.string.clear_history_confirmation_message)) },
             confirmButton = {
@@ -332,7 +341,10 @@ fun MainActivityContent(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirmation = false }) {
+                TextButton(onClick = {
+                    @Suppress("AssignedValueIsNeverRead")
+                    showDeleteConfirmation = false
+                }) {
                     Text(stringResource(R.string.cancel))
                 }
             }
@@ -340,6 +352,7 @@ fun MainActivityContent(
     }
 
     // Modal
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
     selectedTextForModal?.let { currentText ->
         Dialog(
             onDismissRequest = { selectedTextForModal = null },
