@@ -1,9 +1,16 @@
 package com.notone.stabiliscan.ui
 
 import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.view.Gravity
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,8 +18,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -45,9 +51,14 @@ fun MainActivityContent(
     var selectedTextForModal by remember { mutableStateOf<String?>(null) }
     var fontSize by remember { mutableFloatStateOf(32f) }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
+    
+    // Collapsible state for Sidebar
+    var isAboutExpanded by remember { mutableStateOf(false) }
 
-    // ✅ Resolve ALL strings in composable scope
+    // Resolve strings here to avoid querying resources using LocalContext.current inside LaunchedEffect or where not allowed
     val noTextFoundMessage = stringResource(R.string.no_text_found)
+    val errorPrefixMessage = stringResource(R.string.error_prefix)
+    val copiedMessage = stringResource(R.string.copied_to_clipboard)
 
     // Listen to scan events
     LaunchedEffect(Unit) {
@@ -57,14 +68,11 @@ fun MainActivityContent(
                     selectedTextForModal = event.text
                     null
                 }
-
                 is TextRecognitionViewModel.ScanEvent.NoTextFound -> {
                     noTextFoundMessage
                 }
-
                 is TextRecognitionViewModel.ScanEvent.Error -> {
-                    // ✅ SAFE: use context here instead of stringResource
-                    context.getString(R.string.error_prefix, event.message)
+                    errorPrefixMessage.format(event.message)
                 }
             }
 
@@ -105,28 +113,49 @@ fun MainActivityContent(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    Text(
-                        stringResource(R.string.about_app),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-
-                    Surface(
-                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
-                        shape = MaterialTheme.shapes.medium,
-                        modifier = Modifier.padding(top = 8.dp)
+                    // Collapsible "Sobre a Aplicação"
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { isAboutExpanded = !isAboutExpanded }
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            stringResource(R.string.app_description),
-                            fontSize = 15.sp,
-                            lineHeight = 22.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(16.dp)
+                            stringResource(R.string.about_app),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                        Icon(
+                            imageVector = if (isAboutExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(32.dp))
+                    AnimatedVisibility(
+                        visible = isAboutExpanded,
+                        enter = expandVertically(),
+                        exit = shrinkVertically()
+                    ) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
+                            shape = MaterialTheme.shapes.medium,
+                            modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
+                        ) {
+                            Text(
+                                stringResource(R.string.app_description),
+                                fontSize = 15.sp,
+                                lineHeight = 22.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     Spacer(modifier = Modifier.height(24.dp))
 
@@ -262,13 +291,39 @@ fun MainActivityContent(
             ) {
                 Column(Modifier.fillMaxSize().padding(24.dp)) {
 
-                    Text(
-                        stringResource(R.string.reading_completed),
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Spacer(modifier = Modifier.width(48.dp))
+                        
+                        Text(
+                            stringResource(R.string.reading_completed),
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.weight(1f)
+                        )
+                        
+                        // Copy Button
+                        IconButton(
+                            onClick = {
+                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                val clip = ClipData.newPlainText("StabiliScan", currentText)
+                                clipboard.setPrimaryClip(clip)
+                                Toast.makeText(context, copiedMessage, Toast.LENGTH_SHORT).show()
+                            },
+                            modifier = Modifier.size(48.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ContentCopy,
+                                contentDescription = stringResource(R.string.copy_to_clipboard),
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                    }
 
                     Spacer(Modifier.height(24.dp))
 
@@ -276,7 +331,8 @@ fun MainActivityContent(
                         Modifier.weight(1f)
                             .fillMaxWidth()
                             .background(
-                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                                MaterialTheme.shapes.large
                             )
                             .padding(24.dp)
                     ) {
@@ -284,25 +340,52 @@ fun MainActivityContent(
                             text = currentText,
                             fontSize = fontSize.sp,
                             lineHeight = (fontSize * 1.3).sp,
-                            modifier = Modifier.verticalScroll(rememberScrollState())
+                            modifier = Modifier.verticalScroll(rememberScrollState()),
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
 
                     Spacer(Modifier.height(24.dp))
 
-                    Slider(
-                        value = fontSize,
-                        onValueChange = { fontSize = it },
-                        valueRange = 12f..100f
-                    )
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            stringResource(R.string.adjust_font_size), 
+                            fontSize = 20.sp, 
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Slider(
+                            value = fontSize,
+                            onValueChange = { fontSize = it },
+                            valueRange = 12f..100f,
+                            modifier = Modifier.padding(horizontal = 12.dp),
+                            colors = SliderDefaults.colors(
+                                thumbColor = MaterialTheme.colorScheme.primary,
+                                activeTrackColor = MaterialTheme.colorScheme.primary,
+                                inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer
+                            )
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), 
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("A", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                            Text("A", fontSize = 32.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface)
+                        }
+                    }
 
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(24.dp))
 
                     Button(
                         onClick = { selectedTextForModal = null },
-                        modifier = Modifier.fillMaxWidth().height(72.dp)
+                        modifier = Modifier.fillMaxWidth().height(72.dp),
+                        shape = MaterialTheme.shapes.large
                     ) {
-                        Text(stringResource(R.string.back), fontSize = 22.sp)
+                        Text(stringResource(R.string.back), fontSize = 22.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }

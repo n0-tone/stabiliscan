@@ -70,27 +70,30 @@ class TextRecognitionViewModel(application: Application) : AndroidViewModel(appl
     fun recognizeText(bitmap: Bitmap) {
         if (isProcessing) return
         isProcessing = true
+        recognizedText = "" // Clear previous text to avoid showing stale results
         
         val image = InputImage.fromBitmap(bitmap, 0)
 
         recognizer.process(image)
             .addOnSuccessListener { visionText ->
-                recognizedText = visionText.text
+                val resultText = visionText.text
+                recognizedText = resultText
                 isProcessing = false
                 viewModelScope.launch {
-                    if (visionText.text.isNotBlank()) {
-                        saveToHistory(visionText.text)
-                        _scanEvents.emit(ScanEvent.Success(visionText.text))
+                    if (resultText.isNotBlank()) {
+                        saveToHistory(resultText)
+                        _scanEvents.emit(ScanEvent.Success(resultText))
                     } else {
                         _scanEvents.emit(ScanEvent.NoTextFound)
                     }
                 }
             }
             .addOnFailureListener {
-                recognizedText = "Error: ${it.message}"
+                val errorMessage = it.message ?: "Unknown error"
+                recognizedText = "Error: $errorMessage"
                 isProcessing = false
                 viewModelScope.launch {
-                    _scanEvents.emit(ScanEvent.Error(it.message ?: "Unknown error"))
+                    _scanEvents.emit(ScanEvent.Error(errorMessage))
                 }
             }
     }

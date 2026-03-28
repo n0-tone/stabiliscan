@@ -27,4 +27,6 @@
     <string name="cancel">Cancelar</string>
     <string name="confirm">Confirmar</string>
     <string name="scanning">A digitalizar…</string>
+    <string name="copy_to_clipboard">Copiar Texto</string>
+    <string name="copied_to_clipboard">Texto copiado!</string>
 </resources>
