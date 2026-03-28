@@ -10,8 +10,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.core.content.ContextCompat
+import com.notone.stabiliscan.R
 
 @Composable
 fun CameraPermissionHandler(onPermissionGranted: () -> Unit) {
@@ -40,9 +42,9 @@ fun CameraPermissionHandler(onPermissionGranted: () -> Unit) {
 
     if (showDialog) {
         AlertDialog(
-            onDismissRequest = { /* Bloqueia o fecho ao carregar fora */ },
-            title = { Text("Permissão Necessária", fontWeight = FontWeight.Bold) },
-            text = { Text("O StabiliScan precisa de aceder à câmara para poder ler texto. Por favor, conceda a permissão para continuar.") },
+            onDismissRequest = { },
+            title = { Text(stringResource(R.string.permission_required_title), fontWeight = FontWeight.Bold) },
+            text = { Text(stringResource(R.string.permission_required_desc)) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -50,7 +52,7 @@ fun CameraPermissionHandler(onPermissionGranted: () -> Unit) {
                     },
                     shape = MaterialTheme.shapes.medium
                 ) {
-                    Text("Dar permissão")
+                    Text(stringResource(R.string.grant_permission))
                 }
             }
         )

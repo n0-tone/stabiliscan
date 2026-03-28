@@ -29,4 +29,7 @@
     <string name="scanning">A digitalizar…</string>
     <string name="copy_to_clipboard">Copiar Texto</string>
     <string name="copied_to_clipboard">Texto copiado!</string>
+    <string name="permission_required_title">Permissão Necessária</string>
+    <string name="permission_required_desc">O StabiliScan precisa de aceder à câmara para poder ler texto. Por favor, conceda a permissão para continuar.</string>
+    <string name="grant_permission">Dar permissão</string>
 </resources>
